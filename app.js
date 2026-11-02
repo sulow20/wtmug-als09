@@ -489,28 +489,34 @@ $("downloadButton").addEventListener("click", () => {
 
     link.remove();
 });
+// ==========================================
+// QR KOD OKUYUCU - DÜZELTİLMİŞ
+// ==========================================
+
 $("scanButton").addEventListener("click", startQRScanner);
 
 async function startQRScanner() {
 
-    if (
-        !navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia
-    ) {
-        $("qrStatus").textContent =
-            "Kamera erişimi desteklenmiyor.";
+    const video = $("qrVideo");
 
-        return;
-    }
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
 
-    if (!("BarcodeDetector" in window)) {
         $("qrStatus").textContent =
-            "QR okuyucu desteklenmiyor. ID'yi elle giriniz.";
+            "Kamera HTTPS üzerinden açılmalıdır.";
 
         return;
     }
 
     try {
+
+        if (!("BarcodeDetector" in window)) {
+
+            $("qrStatus").textContent =
+                "Bu tarayıcı QR okumayı desteklemiyor.";
+
+            return;
+        }
 
         barcodeDetector = new BarcodeDetector({
             formats: ["qr_code"]
@@ -518,32 +524,40 @@ async function startQRScanner() {
 
         qrStream = await navigator.mediaDevices.getUserMedia({
             video: {
-                facingMode: "environment"
+                facingMode: {
+                    ideal: "environment"
+                }
             },
             audio: false
         });
 
-        const video = $("qrVideo");
-
         video.srcObject = qrStream;
-        video.classList.add("active");
+
+        video.setAttribute("playsinline", "");
+        video.setAttribute("autoplay", "");
 
         await video.play();
+
+        video.classList.add("active");
 
         qrScanning = true;
 
         $("qrStatus").textContent =
-            "QR kod kameraya gösteriniz.";
+            "Kamera açıldı. Hocanın QR kodunu göster.";
 
         scanQRFrame();
 
     } catch (error) {
 
         $("qrStatus").textContent =
-            "Kamera açılamadı: " + error.message;
+            "Kamera hatası: " + error.message;
 
     }
 }
+
+// ==========================================
+// QR OKUMA
+// ==========================================
 
 async function scanQRFrame() {
 
@@ -555,31 +569,45 @@ async function scanQRFrame() {
 
         if (video.readyState >= 2) {
 
-            const codes = await barcodeDetector.detect(video);
+            const results = await barcodeDetector.detect(video);
 
-            if (codes.length > 0) {
+            if (results.length > 0) {
 
-                const result = codes[0].rawValue;
+                const qrText = results[0].rawValue;
 
-                let id = result;
+                let teacherID = qrText;
 
                 try {
-                    const url = new URL(result);
 
-                    id = url.searchParams.get("teacher") || result;
+                    const qrURL = new URL(qrText);
+
+                    teacherID =
+                        qrURL.searchParams.get("teacher") ||
+                        qrURL.searchParams.get("id") ||
+                        qrText;
 
                 } catch (error) {
-                    // QR doğrudan ID içeriyorsa kullan.
+                    teacherID = qrText;
                 }
 
-                teacherIdInput.value = id;
+                teacherID = teacherID.trim();
+
+                if (!teacherID) {
+                    throw new Error("QR kod boş.");
+                }
+
+                teacherIdInput.value = teacherID;
 
                 stopQRScanner();
 
                 $("qrStatus").textContent =
-                    "QR kod başarıyla okundu.";
+                    "ID okundu: " + teacherID;
 
-                connectToTeacher(id);
+                setStudentStatus(
+                    "Hoca bağlantısı kuruluyor..."
+                );
+
+                connectToTeacher(teacherID);
 
                 return;
             }
@@ -587,13 +615,14 @@ async function scanQRFrame() {
 
     } catch (error) {
 
-        console.error("QR tarama hatası:", error);
+        console.error("QR okuma hatası:", error);
 
     }
 
-    requestAnimationFrame(scanQRFrame);
+    if (qrScanning) {
+        requestAnimationFrame(scanQRFrame);
+    }
 }
-
 // ==========================================
 // KAMERA DURDURMA
 // ==========================================
