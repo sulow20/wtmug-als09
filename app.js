@@ -493,156 +493,96 @@ $("downloadButton").addEventListener("click", () => {
 // QR KOD OKUYUCU - DÜZELTİLMİŞ
 // ==========================================
 
+
+let html5QrScanner = null;
+
+// QR OKUTMA BUTONU
 $("scanButton").addEventListener("click", startQRScanner);
 
 async function startQRScanner() {
 
-    const video = $("qrVideo");
+    const status = $("qrStatus");
 
-    if (!navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia) {
-
-        $("qrStatus").textContent =
-            "Kamera HTTPS üzerinden açılmalıdır.";
-
+    if (typeof Html5Qrcode === "undefined") {
+        status.textContent = "QR kütüphanesi yüklenemedi.";
         return;
     }
 
     try {
+        status.textContent = "Kamera açılıyor...";
 
-        if (!("BarcodeDetector" in window)) {
+        html5QrScanner = new Html5Qrcode("qrVideo");
 
-            $("qrStatus").textContent =
-                "Bu tarayıcı QR okumayı desteklemiyor.";
-
-            return;
-        }
-
-        barcodeDetector = new BarcodeDetector({
-            formats: ["qr_code"]
-        });
-
-        qrStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: {
-                    ideal: "environment"
+        await html5QrScanner.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: {
+                    width: 220,
+                    height: 220
                 }
             },
-            audio: false
-        });
+            async (decodedText) => {
 
-        video.srcObject = qrStream;
-
-        video.setAttribute("playsinline", "");
-        video.setAttribute("autoplay", "");
-
-        await video.play();
-
-        video.classList.add("active");
-
-        qrScanning = true;
-
-        $("qrStatus").textContent =
-            "Kamera açıldı. Hocanın QR kodunu göster.";
-
-        scanQRFrame();
-
-    } catch (error) {
-
-        $("qrStatus").textContent =
-            "Kamera hatası: " + error.message;
-
-    }
-}
-
-// ==========================================
-// QR OKUMA
-// ==========================================
-
-async function scanQRFrame() {
-
-    if (!qrScanning) return;
-
-    try {
-
-        const video = $("qrVideo");
-
-        if (video.readyState >= 2) {
-
-            const results = await barcodeDetector.detect(video);
-
-            if (results.length > 0) {
-
-                const qrText = results[0].rawValue;
-
-                let teacherID = qrText;
+                let teacherID = decodedText.trim();
 
                 try {
-
-                    const qrURL = new URL(qrText);
+                    const qrURL = new URL(decodedText);
 
                     teacherID =
                         qrURL.searchParams.get("teacher") ||
                         qrURL.searchParams.get("id") ||
-                        qrText;
+                        decodedText;
 
                 } catch (error) {
-                    teacherID = qrText;
+                    // QR doğrudan ID içeriyorsa kullan.
                 }
 
                 teacherID = teacherID.trim();
 
-                if (!teacherID) {
-                    throw new Error("QR kod boş.");
-                }
+                if (!teacherID) return;
 
-                teacherIdInput.value = teacherID;
+                $("teacherIdInput").value = teacherID;
 
-                stopQRScanner();
+                status.textContent =
+                    "QR okundu! Hocaya bağlanılıyor...";
 
-                $("qrStatus").textContent =
-                    "ID okundu: " + teacherID;
-
-                setStudentStatus(
-                    "Hoca bağlantısı kuruluyor..."
-                );
+                await stopQRScanner();
 
                 connectToTeacher(teacherID);
-
-                return;
             }
-        }
+        );
+
+        status.textContent =
+            "Kamera açık. Hocanın QR kodunu okut.";
 
     } catch (error) {
 
-        console.error("QR okuma hatası:", error);
+        status.textContent =
+            "Kamera hatası: " + error;
 
-    }
-
-    if (qrScanning) {
-        requestAnimationFrame(scanQRFrame);
     }
 }
-// ==========================================
-// KAMERA DURDURMA
-// ==========================================
 
-function stopQRScanner() {
+// KAMERAYI KAPAT
+async function stopQRScanner() {
 
-    qrScanning = false;
+    if (html5QrScanner) {
 
-    if (qrStream) {
+        try {
 
-        qrStream.getTracks().forEach(track => {
-            track.stop();
-        });
+            if (html5QrScanner.isScanning) {
+                await html5QrScanner.stop();
+            }
 
-        qrStream = null;
+            html5QrScanner.clear();
+
+        } catch (error) {
+            console.error(error);
+        }
+
+        html5QrScanner = null;
     }
-
-    $("qrVideo").srcObject = null;
-
-    $("qrVideo").classList.remove("active");
 }
 
 // ==========================================
