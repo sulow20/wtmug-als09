@@ -1,0 +1,180 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #eef2ff;
+    color: #172554;
+}
+
+header {
+    background: #172554;
+    color: white;
+    text-align: center;
+    padding: 25px 10px;
+}
+
+header h1 {
+    margin: 0 0 10px;
+    font-size: 25px;
+}
+
+main {
+    width: 95%;
+    max-width: 750px;
+    margin: 30px auto;
+}
+
+.panel {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 15px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.primary {
+    background: #2563eb;
+    color: white;
+}
+
+.secondary {
+    background: #475569;
+    color: white;
+}
+
+.role-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.role-buttons button {
+    flex: 1;
+    min-width: 130px;
+}
+
+input[type="file"],
+input[type="text"] {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    margin: 12px 0;
+}
+
+.id-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: #eff6ff;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+#qrcode {
+    background: white;
+    padding: 15px;
+    width: fit-content;
+    margin: 15px auto;
+}
+
+#qrcode img,
+#qrcode canvas {
+    max-width: 100%;
+}
+
+.stats {
+    background: #eff6ff;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.log {
+    background: #0f172a;
+    color: #86efac;
+    padding: 15px;
+    border-radius: 8px;
+    height: 220px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.status {
+    margin: 15px 0;
+    padding: 12px;
+    background: #eff6ff;
+    border-radius: 8px;
+}
+
+progress {
+    width: 100%;
+    height: 25px;
+    accent-color: #2563eb;
+}
+
+#qrVideo {
+    width: 100%;
+    max-width: 400px;
+    display: none;
+    margin: 15px auto;
+    border-radius: 10px;
+}
+
+#qrVideo.active {
+    display: block;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #64748b;
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 19px;
+    }
+
+    .panel {
+        padding: 18px;
+    }
+
+    .role-buttons {
+        flex-direction: column;
+    }
+
+    .role-buttons button {
+        width: 100%;
+    }
+}

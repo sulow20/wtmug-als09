@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#172554">
+    <meta name="description" content="WebRTC ile güvenli P2P dosya paylaşımı">
+
+    <title>P2P Dosya Paylaşım Sistemi</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon.svg">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+
+<header>
+    <h1>📁 P2P Dosya Paylaşım Sistemi</h1>
+    <p>WebRTC ile doğrudan dosya paylaşımı</p>
+</header>
+
+<main>
+
+    <section id="roleSection" class="panel">
+        <h2>Uygulama Rolünü Seçiniz</h2>
+
+        <div class="role-buttons">
+            <button id="teacherRole" class="primary">
+                👨‍🏫 Hoca
+            </button>
+
+            <button id="studentRole" class="secondary">
+                🎓 Öğrenci
+            </button>
+        </div>
+    </section>
+
+    <!-- HOCA EKRANI -->
+
+    <section id="teacherSection" class="panel hidden">
+
+        <h2>👨‍🏫 Hoca Modu</h2>
+
+        <label for="fileInput">Gönderilecek dosyayı seçiniz:</label>
+
+        <input type="file" id="fileInput">
+
+        <div id="teacherConnection" class="hidden">
+
+            <h3>Öğrenci Bağlantı Bilgileri</h3>
+
+            <p>Hocanın bağlantı ID'si:</p>
+
+            <div class="id-box">
+                <strong id="teacherId">Bekleniyor...</strong>
+                <button id="copyId">Kopyala</button>
+            </div>
+
+            <p>Öğrenciler aşağıdaki QR kodu okutabilir:</p>
+
+            <div id="qrcode"></div>
+
+            <h3>📊 Gönderim Günlüğü</h3>
+
+            <div class="stats">
+                <p>Bağlanan öğrenci: <strong id="studentCount">0</strong></p>
+                <p>Tamamlanan transfer: <strong id="completedCount">0</strong></p>
+            </div>
+
+            <div id="teacherLog" class="log">
+                Henüz öğrenci bağlanmadı.
+            </div>
+
+        </div>
+
+        <button id="teacherBack" class="secondary">
+            Ana Menüye Dön
+        </button>
+
+    </section>
+
+
+    <!-- ÖĞRENCİ EKRANI -->
+
+    <section id="studentSection" class="panel hidden">
+
+        <h2>🎓 Öğrenci Modu</h2>
+
+        <label for="teacherIdInput">
+            Hocanın bağlantı ID'sini giriniz:
+        </label>
+
+        <input
+            type="text"
+            id="teacherIdInput"
+            placeholder="Hocanın ID'sini giriniz"
+            autocomplete="off"
+        >
+
+        <button id="connectButton" class="primary">
+            Bağlan
+        </button>
+
+        <div id="qrArea" class="hidden">
+
+            <button id="scanButton" class="secondary">
+                📷 Kamera ile QR Okut
+            </button>
+
+            <video id="qrVideo" autoplay playsinline></video>
+
+            <p id="qrStatus"></p>
+
+        </div>
+
+        <div id="studentStatus" class="status">
+            Bağlantı bekleniyor...
+        </div>
+
+        <div id="progressArea" class="hidden">
+
+            <h3>Dosya Alınıyor</h3>
+
+            <p id="fileName">Dosya adı:</p>
+
+            <progress id="progressBar" value="0" max="100"></progress>
+
+            <p id="progressText">%0</p>
+
+        </div>
+
+        <div id="downloadArea" class="hidden">
+
+            <p>✅ Dosya başarıyla alındı!</p>
+
+            <button id="downloadButton" class="primary">
+                ⬇ İndir
+            </button>
+
+        </div>
+
+        <button id="studentBack" class="secondary">
+            Ana Menüye Dön
+        </button>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>ALŞ09 - WebRTC P2P Dosya Transferi</p>
+</footer>
+
+<script src="app.js"></script>
+
+</body>
+</html>

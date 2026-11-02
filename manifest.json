@@ -1,0 +1,21 @@
+
+{
+  "name": "P2P Dosya Paylaşım Sistemi",
+  "short_name": "P2P Paylaşım",
+  "description": "WebRTC ile doğrudan dosya transferi",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eef2ff",
+  "theme_color": "#172554",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
