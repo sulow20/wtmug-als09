@@ -147,94 +147,74 @@ fileInput.addEventListener("change", event => {
 });
 
 function startTeacher() {
-    if (!selectedFile) return;
+
+    if (!selectedFile) {
+        alert("Önce dosya seçmelisin!");
+        return;
+    }
+
+    $("teacherConnection").classList.remove("hidden");
+
+    teacherId.textContent = "Bağlantı oluşturuluyor...";
+
+    teacherLog.textContent = "";
+
+    logMessage("PeerJS sunucusuna bağlanılıyor...");
 
     if (peer) {
         peer.destroy();
+        peer = null;
     }
-
-    studentConnections.clear();
-
-    updateStudentCount();
-    updateCompletedCount();
-
-    $("teacherConnection").classList.remove("hidden");
-    teacherLog.textContent = "";
-
-    logMessage("Hoca bağlantısı hazırlanıyor...");
 
     peer = new Peer(undefined, peerConfig);
 
-    peer.on("open", id => {
+    peer.on("open", function(id) {
+
         teacherId.textContent = id;
 
-        logMessage("Hoca bağlantısı hazır.");
+        logMessage("Hoca ID başarıyla oluşturuldu: " + id);
 
         const qrContainer = $("qrcode");
+
         qrContainer.innerHTML = "";
 
         const qrData = new URL(window.location.href);
+
         qrData.searchParams.set("teacher", id);
 
         new QRCode(qrContainer, {
             text: qrData.toString(),
             width: 220,
-            height: 220,
-            correctLevel: QRCode.CorrectLevel.M
+            height: 220
         });
 
-        logMessage("QR kod oluşturuldu.");
+        logMessage("QR kod hazır.");
     });
 
-    peer.on("connection", connection => {
-        const id = connection.peer;
+    peer.on("error", function(error) {
 
-        const student = {
-            connection,
-            progress: 0,
-            completed: false,
-            sending: false
-        };
+        teacherId.textContent = "Bağlantı hatası!";
 
-        studentConnections.set(id, student);
-        updateStudentCount();
+        logMessage("PeerJS hata kodu: " + error.type);
 
-        logMessage("Öğrenci bağlandı: " + id);
+        logMessage("Hata açıklaması: " + error.message);
 
-        connection.on("open", async () => {
-            if (student.sending) return;
+        console.error(error);
 
-            student.sending = true;
-
-            try {
-                logMessage("Dosya gönderimi başladı: " + id);
-
-                await sendFile(connection, student);
-
-                student.completed = true;
-                updateCompletedCount();
-
-                logMessage("Transfer tamamlandı: " + id);
-
-            } catch (error) {
-                logMessage("Transfer hatası: " + error.message);
-            }
-        });
-
-        connection.on("close", () => {
-            logMessage("Bağlantı kapandı: " + id);
-        });
-
-        connection.on("error", error => {
-            logMessage("Bağlantı hatası: " + error.message);
-        });
     });
 
-    peer.on("error", error => {
-        logMessage("PeerJS hatası: " + error.message);
+    peer.on("disconnected", function() {
+
+        logMessage("PeerJS bağlantısı kesildi.");
+
+    });
+
+    peer.on("connection", function(connection) {
+
+        logMessage("Yeni öğrenci bağlandı: " + connection.peer);
+
     });
 }
-
 // ==========================================
 // DOSYA GÖNDERME
 // ==========================================
